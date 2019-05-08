@@ -15,14 +15,31 @@
   * dimensions (These represent the character's size in the video game)
   * destroy() // prototype method that returns: `${this.name} was removed from the game.`
 */
-
+function GameObject(attributes) {
+  this.createdAt = attributes.createdAt;
+  this.name = attributes.name;
+  this.dimensions = attributes.dimensions;
+    // length = attributes.dimensions.length,
+    // width = attributes.dimensions.width,
+}
+GameObject.prototype.destroy = function() {
+  return `${this.name} was removed from the game.`;
+}
 /*
   === CharacterStats ===
   * healthPoints
   * takeDamage() // prototype method -> returns the string '<object name> took damage.'
   * should inherit destroy() from GameObject's prototype
 */
+function CharacterStats(characterAttributes) {
+  GameObject.call(this, characterAttributes);
+  this.healthPoints = characterAttributes.healthPoints;
+}
+CharacterStats.prototype = Object.create(GameObject.prototype);
 
+CharacterStats.prototype.takeDamage = function() {
+  return `${this.name} took damage.`;
+}
 /*
   === Humanoid (Having an appearance or character resembling that of a human.) ===
   * team
@@ -32,16 +49,67 @@
   * should inherit destroy() from GameObject through CharacterStats
   * should inherit takeDamage() from CharacterStats
 */
- 
+ function Humanoid(humanoidAttributes) {
+   CharacterStats.call(this, humanoidAttributes);
+   this.team = humanoidAttributes.team;
+   this.weapons = humanoidAttributes.weapons;
+   this.language = humanoidAttributes.language;
+ }
+ Humanoid.prototype = Object.create(CharacterStats.prototype);
+
+ Humanoid.prototype.greet = function() {
+   return `${this.name} offers a greeting in ${this.language}`;
+ }
 /*
   * Inheritance chain: GameObject -> CharacterStats -> Humanoid
   * Instances of Humanoid should have all of the same properties as CharacterStats and GameObject.
   * Instances of CharacterStats should have all of the same properties as GameObject.
 */
 
+//==========Villain Prototype===============
+function Villain(villainAttributes) {
+  Humanoid.call(this, villainAttributes);
+  this.specialMove = villainAttributes.specialMove;
+}
+Villain.prototype = Object.create(Humanoid.prototype);
+
+Villain.prototype.lasers = function(target) {
+  if (target.healthPoints > 0){
+    let randomNum = Math.floor(Math.random() * 5);
+    target.healthPoints -= randomNum;
+    if (target.healthPoints < 0){
+      return target.destroy()
+    } else {
+      return `${this.name} attacks ${target.name} for ${randomNum}. ${target.name} has ${target.healthPoints} health points left.`
+    }
+  } else {
+    return `${target} is already dead.`
+  }
+}
+//==========Hero Prototype=================
+function Hero(heroAttributes) {
+  Humanoid.call(this, heroAttributes);
+  this.specialMove = heroAttributes.specialMove
+}
+Hero.prototype = Object.create(Humanoid.prototype);
+
+Hero.prototype.truth = function(target) {
+  if (target.healthPoints > 0){
+    let randomNum = Math.floor(Math.random() * 5);
+    target.healthPoints -= randomNum;
+    if (target.healthPoints < 0){
+      return target.destroy()
+    } else {
+      return `${this.name} attacks ${target.name} for ${randomNum}. ${target.name} has ${target.healthPoints} health points left.`
+    }
+  } else {
+    return `${target} is already dead.`
+  }
+}
+
 // Test you work by un-commenting these 3 objects and the list of console logs below:
 
-/*
+
   const mage = new Humanoid({
     createdAt: new Date(),
     dimensions: {
@@ -92,6 +160,40 @@
     language: 'Elvish',
   });
 
+  const fireBreath = new Villain({
+    createdAt: new Date(),
+    dimensions: {
+      length: 2,
+      width: 1,
+      height: 5
+    },
+    healthPoints: 35,
+    name: 'Evil Jeremy',
+    team: 'Army of Darkness',
+    weapons: [
+      'evil laugh',
+      'lightning sword'
+    ],
+    language: 'evil english'
+  })
+
+  const Collosus = new Hero({
+    createdAt: new Date(),
+    dimensions: {
+      length: 4,
+      width: 6,
+      height: 10
+    },
+    healthPoints: 35,
+    name: 'Hero Doug',
+    team: 'Riders of the Light',
+    weapons: [
+      'smile of beauty',
+      'sword of smite'
+    ],
+    language: 'booming english'
+  })
+
   console.log(mage.createdAt); // Today's date
   console.log(archer.dimensions); // { length: 1, width: 2, height: 4 }
   console.log(swordsman.healthPoints); // 15
@@ -102,9 +204,17 @@
   console.log(archer.greet()); // Lilith offers a greeting in Elvish.
   console.log(mage.takeDamage()); // Bruce took damage.
   console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
-*/
+// */
 
   // Stretch task: 
   // * Create Villain and Hero constructor functions that inherit from the Humanoid constructor function.  
   // * Give the Hero and Villains different methods that could be used to remove health points from objects which could result in destruction if health gets to 0 or drops below 0;
   // * Create two new objects, one a villain and one a hero and fight it out with methods!
+
+function battle (hero, villain){
+  while (hero.healthPoints > 0 && villain.healthPoints > 0){
+    console.log(hero.truth(villain))
+    console.log(villain.lasers(hero))
+  }
+}
+battle(Collosus, fireBreath)
